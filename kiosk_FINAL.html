@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Food Choice Study – Kiosk</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+
+:root {
+  --bg:          #F7F5F0;
+  --surface:     #FFFFFF;
+  --border:      rgba(0,0,0,0.10);
+  --border2:     rgba(0,0,0,0.16);
+  --text:        #1A1A1A;
+  --muted:       #6B6B6B;
+  --accent:      #2D6A4F;
+  --accent-h:    #235540;
+  --accent-dark: #1B4332;
+  --accent-light:#E8F5EE;
+  --font:        'DM Sans', sans-serif;
+}
+
+/* ── FULL VIEWPORT SHELL ───────────────────────────── */
+html, body {
+  width: 100%; 
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden; 
+  font-family: var(--font);
+  background: #e0e0e0; 
+  color: var(--text);
+  display: flex;
+  justify-content: center;
+}
+
+/* ── KIOSK CONTAINER ───────────────────────────── */
+.kiosk {
+  width: 100%;
+  max-width: 680px;
+  margin: 0 auto;
+  height: 100%;
+  height: 100dvh;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 0 20px rgba(0,0,0,0.15);
+}
+
+/* ── TOP HEADER ────────────────────────────────────── */
+.k-header {
+  height: 52px;
+  background: var(--accent-dark);
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  gap: 16px;
+  flex-shrink: 0;
+  z-index: 10;
+}
+.k-header-logo {
+  font-size: 22px;
+}
+.k-header-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+  letter-spacing: .02em;
+}
+.k-header-step {
+  margin-left: auto;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.step-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.3);
+  transition: background .2s;
+}
+.step-dot.done  { background: rgba(255,255,255,0.6); }
+.step-dot.active{ background: #fff; }
+
+/* ── MAIN BODY: sidebar + content ─────────────────── */
+.k-body {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* ── SIDEBAR ───────────────────────────────────────── */
+.k-sidebar {
+  width: 140px;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  flex-shrink: 0;
+}
+@media (max-width: 480px) {
+  .k-sidebar { width: 88px; }
+}
+.k-sidebar::-webkit-scrollbar { display:none; }
+
+.side-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 18px 8px;
+  cursor: default;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+  transition: background .12s;
+  text-align: center;
+}
+.side-tab.active {
+  background: var(--accent-light);
+}
+.side-tab.active::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 4px;
+  background: var(--accent);
+  border-radius: 0 3px 3px 0;
+}
+.side-tab.future {
+  opacity: .38;
+}
+.tab-icon { font-size: 22px; }
+.tab-name {
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1.25;
+}
+.side-tab.active .tab-name { color: var(--accent); font-weight: 600; }
+.tab-check {
+  font-size: 13px;
+  color: var(--accent);
+  font-weight: 700;
+}
+
+/* ── CONTENT AREA ──────────────────────────────────── */
+.k-content {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+  padding-bottom: 80px;
+}
+.k-content::-webkit-scrollbar { width: 4px; }
+.k-content::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.12); border-radius:4px; }
+
+.content-inner {
+  padding: 14px 14px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+
+
+/* ── SECTION LABEL ─────────────────────────────────── */
+.section-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+}
+
+/* ── MENU GRID ─────────────────────────────────────── */
+.menu-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+
+.mcard {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  padding: 13px 11px 11px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 150px;
+  position: relative;
+  transition: border-color .12s, background .12s, box-shadow .12s;
+  user-select: none;
+}
+.mcard:hover { border-color: var(--accent); box-shadow: 0 2px 8px rgba(45,106,79,.10); }
+.mcard.sel    { border-color: var(--accent); background: var(--accent-light); box-shadow: 0 2px 10px rgba(45,106,79,.13); }
+
+.mc-check {
+  position: absolute; top: 9px; right: 9px;
+  width: 18px; height: 18px; border-radius: 50%;
+  border: 1.5px solid rgba(0,0,0,0.18);
+  background: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; color: transparent;
+  transition: all .12s;
+}
+.mcard.sel .mc-check { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+.mc-emoji { font-size: 24px; line-height: 1; }
+.mc-name  { font-size: 13.5px; font-weight: 600; color: var(--text); line-height: 1.3; }
+.mc-desc  { font-size: 12px; color: var(--muted); line-height: 1.35; }
+.mc-pills { display: flex; gap: 5px; flex-wrap: wrap; margin-top: auto; padding-top: 5px; }
+.pill     { font-size: 11.5px; font-weight: 500; padding: 3px 8px; border-radius: 20px; white-space: nowrap; }
+.pcal   { background: #FEF3C7; color: #92400E; }
+.ptaste { background: #EDE9FE; color: #5B21B6; }
+
+/* ── BOTTOM ACTION BAR ──────────────────────────────── */
+.k-action {
+  position: sticky;
+  bottom: 0;
+  z-index: 20;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  padding: 11px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 -2px 8px rgba(0,0,0,0.06);
+}
+.action-summary {
+  flex: 1;
+  min-width: 0;
+}
+.action-count {
+  font-size: 12px;
+  color: var(--muted);
+}
+.action-items {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.btn-skip:hover { border-color: var(--accent); color: var(--accent); }
+
+.btn-next {
+  padding: 10px 20px;
+  border-radius: 22px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  font-family: var(--font);
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  opacity: .3;
+  pointer-events: none;
+  transition: all .12s;
+  box-shadow: 0 2px 8px rgba(45,106,79,.20);
+}
+.btn-next.on { opacity: 1; pointer-events: auto; }
+.btn-next.on:hover { background: var(--accent-h); }
+
+/* ── CONFIRM PAGE ───────────────────────────────────── */
+.confirm-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding-bottom: 12px;
+}
+.confirm-section {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+.confirm-section:last-of-type { border-bottom: none; }
+.confirm-course-lbl {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  margin-bottom: 8px;
+}
+.confirm-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 0;
+  font-size: 14px;
+}
+.confirm-emoji { font-size: 18px; flex-shrink: 0; }
+.confirm-name  { flex: 1; font-weight: 500; }
+.confirm-kcal  { font-size: 12px; color: var(--muted); }
+.confirm-skipped { font-size: 13px; color: var(--muted); font-style: italic; padding: 4px 0; }
+.confirm-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0 0;
+  border-top: 1px solid var(--border);
+  margin-top: 4px;
+}
+.confirm-total-lbl  { font-size: 13px; font-weight: 600; color: var(--muted); }
+.confirm-total-kcal { font-size: 15px; font-weight: 700; color: var(--text); }
+
+/* confirm action bar */
+.confirm-action {
+  position: sticky;
+  bottom: 0;
+  z-index: 20;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  padding: 11px 14px;
+  display: flex;
+  gap: 10px;
+  box-shadow: 0 -2px 8px rgba(0,0,0,0.06);
+}
+.btn-back {
+  flex: 1;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1.5px solid var(--border2);
+  background: transparent;
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all .12s;
+}
+.btn-back:hover { border-color: var(--accent); color: var(--accent); }
+.btn-confirm {
+  flex: 2;
+  padding: 12px;
+  border-radius: 10px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  font-family: var(--font);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(45,106,79,.25);
+  transition: all .12s;
+}
+.btn-confirm:hover { background: var(--accent-h); }
+
+/* ── DONE CARD ──────────────────────────────────────── */
+.done-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  padding: 20px;
+}
+.done-card {
+  background: var(--accent-light);
+  border: 1.5px solid rgba(45,106,79,.22);
+  border-radius: 16px;
+  padding: 32px 24px;
+  text-align: center;
+  max-width: 520px;
+  width: 100%;
+}
+.done-icon  { font-size: 42px; margin-bottom: 14px; }
+.done-title { font-size: 20px; font-weight: 700; color: var(--accent); margin-bottom: 10px; }
+.done-sub   { font-size: 14px; color: var(--muted); line-height: 1.6; margin-bottom: 20px; }
+.btn-close  {
+  padding: 12px 30px;
+  border-radius: 30px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  font-family: var(--font);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(45,106,79,.28);
+  transition: all .12s;
+}
+.btn-close:hover { background: var(--accent-h); }
+.done-note { font-size: 11.5px; color: var(--muted); margin-top: 12px; line-height: 1.5; }
+
+@media (max-width: 480px) {
+  .k-sidebar { width: 72px; }
+  .tab-name  { font-size: 10px; }
+  .tab-icon  { font-size: 18px; }
+  .menu-grid { grid-template-columns: 1fr 1fr; gap: 7px; }
+  .mcard     { padding: 10px 8px 8px; }
+  .mc-name   { font-size: 12px; }
+  .mc-desc   { font-size: 11px; }
+  .mc-pills  { gap: 4px; }
+  .pill      { font-size: 10px; padding: 2px 6px; }
+  .k-action  { padding: 9px 10px; }
+  .btn-next  { padding: 9px 14px; font-size: 12px; }
+}
+.page-header { padding: 4px 0 8px; }
+.page-title  { font-size: 17px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+.page-sub    { font-size: 13.5px; color: var(--muted); line-height: 1.5; }
+</style>
+</head>
+<body>
+<div class="kiosk" id="kiosk">
+
+  <!-- HEADER -->
+  <div class="k-header">
+    <div class="k-header-logo">🍽️</div>
+    <div class="k-header-title">Meal Order</div>
+    <div class="k-header-step" id="stepDots">
+      <div class="step-dot active" id="dot0"></div>
+      <div class="step-dot" id="dot1"></div>
+      <div class="step-dot" id="dot2"></div>
+      <div class="step-dot" id="dot3"></div>
+      <div class="step-dot" id="dot4"></div>
+    </div>
+  </div>
+
+  <!-- BODY -->
+  <div class="k-body">
+
+    <!-- SIDEBAR -->
+    <nav class="k-sidebar" id="sidebar">
+      <div class="side-tab active" id="stab-price">
+        <div class="tab-icon">💰</div>
+        <div class="tab-name">Budget</div>
+      </div>
+      <div class="side-tab future" id="stab-main">
+        <div class="tab-icon">🍽️</div>
+        <div class="tab-name">Main Course</div>
+      </div>
+      <div class="side-tab future" id="stab-drink">
+        <div class="tab-icon">🥤</div>
+        <div class="tab-name">Beverage</div>
+      </div>
+      <div class="side-tab future" id="stab-dessert">
+        <div class="tab-icon">🍰</div>
+        <div class="tab-name">Dessert</div>
+      </div>
+      <div class="side-tab future" id="stab-confirm">
+        <div class="tab-icon">✅</div>
+        <div class="tab-name">Confirm</div>
+      </div>
+    </nav>
+
+    <!-- CONTENT + ACTION stacked -->
+    <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;">
+      <div class="k-content" id="content"></div>
+      <div id="actionBar"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+/* ════════════════════════════════
+   CONFIG
+════════════════════════════════ */
+const GAS     = "https://script.google.com/macros/s/AKfycbyEN-Gv4eA83M-aiWnJRRUDfnwnnMkmC75albWmyNKLT2fMZtpkexRam3DtSERjL86BEA/exec";
+const COND    = "kiosk";
+const SESSION = "P" + Date.now().toString(36).toUpperCase();
+const RID     = new URLSearchParams(location.search).get("rid") || "";
+
+/* ════════════════════════════════
+   MENU DATA
+════════════════════════════════ */
+const MENUS = {
+  main: [
+    {id:"m1",  emoji:"🍕", name:"Margherita Pizza",         desc:"#ThinCrust #FreshVeggie #LowCal",   cal:480, taste:4.2, type:"healthy",   pair:"Pizza"},
+    {id:"m2",  emoji:"🍕", name:"Pepperoni Deep-Dish Pizza",desc:"#ExtraCheese #MeatTopping #Rich",   cal:890, taste:4.4, type:"unhealthy", pair:"Pizza"},
+    {id:"m3",  emoji:"🍝", name:"Zucchini Noodle Pasta",    desc:"#Protein #Healthy",                 cal:420, taste:4.2, type:"healthy",   pair:"Pasta"},
+    {id:"m4",  emoji:"🍝", name:"Creamy Carbonara Pasta",   desc:"#RichCream #SavoryBacon",           cal:820, taste:4.4, type:"unhealthy", pair:"Pasta"},
+  ],
+  drink: [
+    {id:"d1",  emoji:"🥤", name:"Zero Sugar Cola",          desc:"#ZeroSugar #ZeroCalorie #Clean",    cal:0,   taste:4.2, type:"healthy",   pair:"Cola"},
+    {id:"d2",  emoji:"🥤", name:"Original Cola",            desc:"#Sweet #Classic #Refreshing",       cal:210, taste:4.4, type:"unhealthy", pair:"Cola"},
+    {id:"d3",  emoji:"🥭", name:"Vitamin Smoothie",          desc:"#HighVitamin #Natural #NoAddedSugar", cal:130, taste:4.2, type:"healthy",   pair:"Juice"},
+    {id:"d4",  emoji:"🥭", name:"Mango Smoothie",            desc:"#Sweetened #RichFlavor #Tropical",   cal:310, taste:4.4, type:"unhealthy", pair:"Juice"},
+  ],
+  dessert: [
+    {id:"ds1", emoji:"🍰", name:"Low-Carb Cheesecake",      desc:"#LowFat #LowCarb",                  cal:240, taste:4.2, type:"healthy",   pair:"Cheesecake"},
+    {id:"ds2", emoji:"🍰", name:"Rich Cheesecake",          desc:"#RichAndCreamy #FullFlavor",        cal:520, taste:4.4, type:"unhealthy", pair:"Cheesecake"},
+    {id:"ds3", emoji:"🍦", name:"Low-fat Ice Cream",        desc:"#LowFat #Light",                    cal:160, taste:4.2, type:"healthy",   pair:"IceCream"},
+    {id:"ds4", emoji:"🍦", name:"Double Scoop Gelato",      desc:"#SweetTreat #RichFlavor",           cal:450, taste:4.4, type:"unhealthy", pair:"IceCream"},
+  ]
+};
+
+/* ════════════════════════════════
+   STATE
+════════════════════════════════ */
+let sel        = {main:[], drink:[], dessert:[]};
+let priceRange = "";
+let skipped = {drink:false, dessert:false};
+let t0            = Date.now();
+let sessionStart  = Date.now();
+let sessionDurations = [];
+let stepShowTimes = {};
+let stepDecisionTimes = {};
+let sessionDecisionTimes = {}; // all sessions
+let sessionPresentedOrders = {}; // all sessions
+let sessionCount   = 1;
+let confirmTime    = null;
+let oNum    = 0;
+let restarts= 0;
+let log     = [];
+let shown   = {};
+
+const content   = document.getElementById("content");
+const actionBar = document.getElementById("actionBar");
+
+/* ════════════════════════════════
+   HELPERS
+════════════════════════════════ */
+const elapsed = () => ((Date.now()-t0)/1000).toFixed(1);
+const shuffle = a => [...a].sort(() => Math.random()-.5);
+
+function setTab(name) {
+  const order = ["price","main","drink","dessert","confirm"];
+  const idx   = order.indexOf(name);
+  order.forEach((t, i) => {
+    const el = document.getElementById("stab-"+t);
+    if (!el) return;
+    el.className = "side-tab " + (i === idx ? "active" : i < idx ? "" : "future");
+    if (i < idx) {
+      el.innerHTML = `<div class="tab-check">✓</div><div class="tab-name">${el.querySelector(".tab-name")?.textContent||t}</div>`;
+    }
+  });
+
+  // step dots
+  [0,1,2,3,4].forEach(i => {
+    const d = document.getElementById("dot"+i);
+    if (!d) return;
+    d.className = "step-dot " + (i < idx ? "done" : i === idx ? "active" : "");
+  });
+}
+
+/* ════════════════════════════════
+   MENU GRID
+════════════════════════════════ */
+function buildGrid(course) {
+  const items = shuffle(MENUS[course]);
+  shown[course] = items.map((it,i) => ({id:it.id, name:it.name, pos:i+1}));
+  // record presented order per session
+  const sessionKey = "session"+sessionCount;
+  if(!sessionPresentedOrders[sessionKey]) sessionPresentedOrders[sessionKey]={};
+  sessionPresentedOrders[sessionKey][course] = items.map(it=>it.name);
+
+  const grid = document.createElement("div");
+  grid.className = "menu-grid";
+
+  items.forEach((item, pos) => {
+    const card = document.createElement("div");
+    card.className = "mcard";
+    card.dataset.id = item.id;
+    card.innerHTML = `
+      <div class="mc-check">✓</div>
+      <div class="mc-emoji">${item.emoji}</div>
+      <div class="mc-name">${item.name}</div>
+      <div class="mc-desc">${item.desc}</div>
+      <div class="mc-pills">
+        <span class="pill pcal">${item.cal} kcal</span>
+        <span class="pill ptaste">Taste ${item.taste}/5</span>
+      </div>`;
+
+    card.addEventListener("click", () => {
+      const arr = sel[course];
+      const idx = arr.findIndex(s => s.id === item.id);
+      if (idx !== -1) {
+        // clicking same card → deselect
+        arr.splice(idx, 1);
+        log.push({action:"deselect", course, item:item.name, elapsed:elapsed()});
+        card.classList.remove("sel");
+      } else {
+        // deselect any previously selected card in this course
+        if (arr.length > 0) {
+          const prev = arr[0];
+          arr.splice(0, 1);
+          log.push({action:"deselect", course, item:prev.name, elapsed:elapsed()});
+          const prevCard = grid.querySelector(`.mcard[data-id="${prev.id}"]`);
+          if (prevCard) prevCard.classList.remove("sel");
+        }
+        // select new card
+        oNum++;
+        arr.push({...item, order:oNum, pos:pos+1, ts:Date.now()});
+        log.push({action:"select", course, item:item.name, type:item.type, order:oNum, elapsed:elapsed()});
+        card.classList.add("sel");
+      }
+      syncAction(course);
+    });
+    grid.appendChild(card);
+  });
+  // record the moment grid is fully built (visible to user)
+  setTimeout(() => { stepShowTimes[course] = Date.now(); }, 0);
+  return grid;
+}
+
+/* ════════════════════════════════
+   ACTION BAR
+════════════════════════════════ */
+function buildAction({course, nextLabel, onNext}) {
+  actionBar.innerHTML = "";
+  const bar = document.createElement("div");
+  bar.className = "k-action";
+
+  const summary = document.createElement("div");
+  summary.className = "action-summary";
+  summary.innerHTML = `
+    <div class="action-count" id="aCount">No items selected</div>
+    <div class="action-items" id="aItems"></div>`;
+  bar.appendChild(summary);
+
+  const nb = document.createElement("button");
+  nb.className = "btn-next";
+  nb.id = "btnNext";
+  nb.textContent = nextLabel;
+  nb.addEventListener("click", () => {
+    content.querySelectorAll(".mcard").forEach(c => c.style.pointerEvents="none");
+    actionBar.innerHTML = "";
+    onNext();
+  });
+  bar.appendChild(nb);
+
+  actionBar.appendChild(bar);
+  syncAction(course);
+}
+
+function syncAction(course) {
+  const n  = sel[course].length;
+  const ac = document.getElementById("aCount");
+  const ai = document.getElementById("aItems");
+  const nb = document.getElementById("btnNext");
+  if (!ac) return;
+  ac.textContent = n === 0 ? "No items selected" : n === 1 ? "1 item selected" : `${n} items selected`;
+  ai.textContent = sel[course].map(s=>s.name).join(", ");
+  nb && (n > 0 ? nb.classList.add("on") : nb.classList.remove("on"));
+}
+
+/* ════════════════════════════════
+   STEPS
+════════════════════════════════ */
+function showPrice() {
+  setTab("price");
+  content.innerHTML = "";
+  actionBar.innerHTML = "";
+
+  const inner = document.createElement("div");
+  inner.className = "content-inner";
+
+  const hdr = document.createElement("div");
+  hdr.className = "page-header";
+  hdr.innerHTML = `
+    <div class="page-title">Select Your Budget</div>
+    <div style="display:inline-block;background:var(--accent);color:#fff;font-size:13px;font-weight:700;padding:5px 14px;border-radius:20px;margin:8px 0 10px;">🍽️ Three-Course Meal Order</div>
+    <div class="page-sub">You will be selecting <strong>one item each</strong> from the main course, beverage, and dessert. Please choose a price range for your main dish to get started.</div>`;
+  inner.appendChild(hdr);
+
+  const btnWrap = document.createElement("div");
+  btnWrap.style.cssText = "display:flex;flex-direction:column;gap:12px;margin-top:8px;";
+
+  const options = ["Under $15", "$15 – $25", "Over $25"];
+  options.forEach(opt => {
+    const btn = document.createElement("button");
+    btn.textContent = opt;
+    btn.style.cssText = "padding:16px 24px;border-radius:12px;border:1.5px solid var(--border2);background:var(--surface);color:var(--text);font-family:var(--font);font-size:15px;font-weight:600;cursor:pointer;text-align:left;transition:all .13s;width:100%;";
+    btn.onmouseover = () => { btn.style.borderColor = "var(--accent)"; btn.style.background = "var(--accent-light)"; };
+    btn.onmouseout  = () => { btn.style.borderColor = "var(--border2)"; btn.style.background = "var(--surface)"; };
+    btn.addEventListener("click", () => {
+      priceRange = opt;
+      log.push({action:"price_select", value:opt, elapsed:elapsed()});
+      showMain();
+    });
+    btnWrap.appendChild(btn);
+  });
+
+  inner.appendChild(btnWrap);
+  content.appendChild(inner);
+}
+
+function showMain() {
+  setTab("main");
+  content.innerHTML = "";
+
+  const inner = document.createElement("div");
+  inner.className = "content-inner";
+  const lbl = document.createElement("div");
+  lbl.className = "section-label";
+  lbl.textContent = "Main Course";
+  inner.appendChild(lbl);
+  inner.appendChild(buildGrid("main"));
+  content.appendChild(inner);
+
+  buildAction({
+    course: "main",
+    nextLabel: "Add Beverage →",
+    onNext: showDrink,
+  });
+}
+
+function showDrink() {
+  if(stepShowTimes["main"]){
+    const dt=((Date.now()-stepShowTimes["main"])/1000).toFixed(1);
+    stepDecisionTimes["main"]=dt;
+    const sdKey="session"+sessionCount;
+    if(!sessionDecisionTimes[sdKey]) sessionDecisionTimes[sdKey]={};
+    sessionDecisionTimes[sdKey]["main"]=dt;
+  }
+  stepShowTimes["drink"]=Date.now();
+  setTab("drink");
+  skipped.drink = false;
+  content.innerHTML = "";
+
+  const inner = document.createElement("div");
+  inner.className = "content-inner";
+
+  const lbl = document.createElement("div");
+  lbl.className = "section-label";
+  lbl.textContent = "Beverage";
+  inner.appendChild(lbl);
+  inner.appendChild(buildGrid("drink"));
+  content.appendChild(inner);
+
+  buildAction({
+    course: "drink",
+    nextLabel: "Add Dessert →",
+    onNext: showDessert,
+  });
+}
+
+function showDessert() {
+  if(stepShowTimes["drink"]){
+    const dt=((Date.now()-stepShowTimes["drink"])/1000).toFixed(1);
+    stepDecisionTimes["drink"]=dt;
+    const sdKey="session"+sessionCount;
+    if(!sessionDecisionTimes[sdKey]) sessionDecisionTimes[sdKey]={};
+    sessionDecisionTimes[sdKey]["drink"]=dt;
+  }
+  stepShowTimes["dessert"]=Date.now();
+  setTab("dessert");
+  skipped.dessert = false;
+  content.innerHTML = "";
+
+  const inner = document.createElement("div");
+  inner.className = "content-inner";
+
+  const lbl = document.createElement("div");
+  lbl.className = "section-label";
+  lbl.textContent = "Dessert";
+  inner.appendChild(lbl);
+  inner.appendChild(buildGrid("dessert"));
+  content.appendChild(inner);
+
+  buildAction({
+    course: "dessert",
+    nextLabel: "Review Order →",
+    onNext: showConfirm,
+  });
+}
+
+function showConfirm() {
+  if(stepShowTimes["dessert"]){
+    const dt=((Date.now()-stepShowTimes["dessert"])/1000).toFixed(1);
+    stepDecisionTimes["dessert"]=dt;
+    const sdKey="session"+sessionCount;
+    if(!sessionDecisionTimes[sdKey]) sessionDecisionTimes[sdKey]={};
+    sessionDecisionTimes[sdKey]["dessert"]=dt;
+  }
+  setTab("confirm");
+  content.innerHTML = "";
+  actionBar.innerHTML = "";
+
+  const inner = document.createElement("div");
+  inner.className = "content-inner";
+
+  const lbl = document.createElement("div");
+  lbl.className = "section-label";
+  lbl.textContent = "Order Summary";
+  inner.appendChild(lbl);
+
+  const wrap = document.createElement("div");
+  wrap.className = "confirm-wrap";
+  let totalKcal = 0;
+
+  ["main","drink","dessert"].forEach(course => {
+    const items = sel[course];
+    const sec = document.createElement("div");
+    sec.className = "confirm-section";
+    const clbl = document.createElement("div");
+    clbl.className = "confirm-course-lbl";
+    clbl.textContent = {main:"Main Course", drink:"Beverage", dessert:"Dessert"}[course];
+    sec.appendChild(clbl);
+
+    if (!items.length) {
+      const skippedEl = document.createElement("div");
+      skippedEl.className = "confirm-skipped";
+      skippedEl.textContent = "Skipped";
+      sec.appendChild(skippedEl);
+    } else {
+      items.forEach(it => {
+        totalKcal += it.cal;
+        const row = document.createElement("div");
+        row.className = "confirm-item";
+        row.innerHTML = `
+          <div class="confirm-emoji">${it.emoji}</div>
+          <div class="confirm-name">${it.name}</div>
+          <div class="confirm-kcal">${it.cal} kcal</div>`;
+        sec.appendChild(row);
+      });
+    }
+    wrap.appendChild(sec);
+  });
+
+  const tot = document.createElement("div");
+  tot.className = "confirm-total";
+  tot.innerHTML = `<div class="confirm-total-lbl">Total</div>
+    <div class="confirm-total-kcal">${totalKcal} kcal</div>`;
+  wrap.appendChild(tot);
+  inner.appendChild(wrap);
+  content.appendChild(inner);
+
+  // confirm action
+  const bar = document.createElement("div");
+  bar.className = "confirm-action";
+
+  const back = document.createElement("button");
+  back.className = "btn-back";
+  back.textContent = "Start Over";
+  back.addEventListener("click", () => {
+    sessionDurations.push(((Date.now()-sessionStart)/1000).toFixed(1));
+    sessionStart = Date.now();
+    sessionCount++;
+    stepShowTimes = {};
+    stepDecisionTimes = {};
+    restarts++;
+    log.push({action:"restart", n:restarts, elapsed:elapsed()});
+    sel = {main:[], drink:[], dessert:[]};
+    skipped = {drink:false, dessert:false};
+    oNum = 0;
+    content.innerHTML = "";
+    actionBar.innerHTML = "";
+    setTab("price");
+    showPrice();
+  });
+
+  const conf = document.createElement("button");
+  conf.className = "btn-confirm";
+  conf.textContent = "Confirm Order";
+  conf.addEventListener("click", onConfirm);
+
+  bar.appendChild(back);
+  bar.appendChild(conf);
+  actionBar.appendChild(bar);
+}
+
+function onConfirm() {
+  confirmTime = Date.now();
+  // record final session duration
+  if(sessionStart) sessionDurations.push(((confirmTime-sessionStart)/1000).toFixed(1));
+  actionBar.innerHTML = "";
+  content.innerHTML = "";
+
+  const wrap = document.createElement("div");
+  wrap.className = "done-wrap";
+  wrap.innerHTML = `
+    <div class="done-card">
+      <div class="done-icon">✅</div>
+      <div class="done-title">Order Complete!</div>
+      <div class="done-sub">Your response has been saved.<br>Please close this window and return to the survey to continue.</div>
+      <button class="btn-close" onclick="(function(){try{window.open('','_self').close();}catch(e){window.close();}})()">Close This Window</button>
+      <div class="done-note">If the window does not close, please close it manually and return to the survey.</div>
+    </div>`;
+  content.appendChild(wrap);
+
+  submitData();
+}
+
+/* ════════════════════════════════
+   DATA SUBMIT
+════════════════════════════════ */
+function submitData() {
+  const all = [...sel.main,...sel.drink,...sel.dessert];
+  const hc  = course => sel[course].filter(s=>s.type==="healthy").length;
+  const uc  = course => sel[course].filter(s=>s.type==="unhealthy").length;
+  const tc  = course => sel[course].reduce((a,s)=>a+s.cal, 0);
+
+  const totalTimeSec = confirmTime
+    ? ((confirmTime - t0)/1000).toFixed(1)
+    : elapsed();
+
+  const p = {
+    session_id:SESSION, qualtrics_rid:RID,
+    condition:"kiosk", sheetName:"Kiosk",
+    timestamp:new Date().toISOString(),
+    total_time_sec:totalTimeSec,
+    price_range:priceRange,
+
+    main_healthy_count:hc("main"),
+    main_unhealthy_count:uc("main"),
+    main_total_kcal:tc("main"),
+
+    drink_healthy_count:hc("drink"),
+    drink_unhealthy_count:uc("drink"),
+    drink_total_kcal:tc("drink"),
+
+    dessert_healthy_count:hc("dessert"),
+    dessert_unhealthy_count:uc("dessert"),
+    dessert_total_kcal:tc("dessert"),
+
+    overall_healthy_count:all.filter(s=>s.type==="healthy").length,
+    overall_unhealthy_count:all.filter(s=>s.type==="unhealthy").length,
+    overall_total_kcal:all.reduce((a,s)=>a+s.cal,0),
+
+    restart_count:restarts,
+    session_durations:JSON.stringify(sessionDurations),
+    session_decision_times:JSON.stringify(sessionDecisionTimes),
+    session_presented_orders:JSON.stringify(sessionPresentedOrders),
+    full_action_log:JSON.stringify(log),
+    // flat columns for R analysis (max 3 sessions)
+    session1_duration_sec:  sessionDurations[0]||"",
+    session2_duration_sec:  sessionDurations[1]||"",
+    session3_duration_sec:  sessionDurations[2]||"",
+    session1_main_dec_sec:  (sessionDecisionTimes.session1||{}).main||"",
+    session1_drink_dec_sec: (sessionDecisionTimes.session1||{}).drink||"",
+    session1_dessert_dec_sec:(sessionDecisionTimes.session1||{}).dessert||"",
+    session2_main_dec_sec:  (sessionDecisionTimes.session2||{}).main||"",
+    session2_drink_dec_sec: (sessionDecisionTimes.session2||{}).drink||"",
+    session2_dessert_dec_sec:(sessionDecisionTimes.session2||{}).dessert||"",
+    session3_main_dec_sec:  (sessionDecisionTimes.session3||{}).main||"",
+    session3_drink_dec_sec: (sessionDecisionTimes.session3||{}).drink||"",
+    session3_dessert_dec_sec:(sessionDecisionTimes.session3||{}).dessert||"",
+    session1_main_order:    JSON.stringify((sessionPresentedOrders.session1||{}).main||[]),
+    session1_drink_order:   JSON.stringify((sessionPresentedOrders.session1||{}).drink||[]),
+    session1_dessert_order: JSON.stringify((sessionPresentedOrders.session1||{}).dessert||[]),
+    session2_main_order:    JSON.stringify((sessionPresentedOrders.session2||{}).main||[]),
+    session2_drink_order:   JSON.stringify((sessionPresentedOrders.session2||{}).drink||[]),
+    session2_dessert_order: JSON.stringify((sessionPresentedOrders.session2||{}).dessert||[])
+  };
+
+  // per-item detail columns
+  ["main","drink","dessert"].forEach(course => {
+    for (let i=0; i<4; i++) {
+      const s = sel[course][i];
+      p[course+"_item"+(i+1)+"_name"]     = s ? s.name  : "";
+      p[course+"_item"+(i+1)+"_type"]     = s ? s.type  : "";
+      p[course+"_item"+(i+1)+"_cal"]      = s ? s.cal   : "";
+      p[course+"_item"+(i+1)+"_pair"]     = s ? s.pair  : "";
+      p[course+"_item"+(i+1)+"_taste"]    = s ? s.taste : "";
+      p[course+"_item"+(i+1)+"_order"]    = s ? s.order : "";
+      p[course+"_item"+(i+1)+"_position"] = s ? s.pos   : "";
+    }
+  });
+
+  fetch(GAS, {
+    method:"POST", mode:"no-cors",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify(p)
+  }).catch(e => console.error(e));
+}
+
+showPrice();
+</script>
+</body>
+</html>
