@@ -409,8 +409,8 @@ html, body {
   .btn-next  { padding: 9px 14px; font-size: 12px; }
 }
 .page-header { padding: 4px 0 8px; }
-.page-title  { font-size: 17px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
-.page-sub    { font-size: 13.5px; color: var(--muted); line-height: 1.5; }
+.page-title  { font-size: 22px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+.page-sub    { font-size: 15px; color: var(--muted); line-height: 1.55; }
 </style>
 </head>
 <body>
@@ -663,8 +663,8 @@ function showPrice() {
   hdr.className = "page-header";
   hdr.innerHTML = `
     <div class="page-title">Select Your Budget</div>
-    <div style="display:inline-block;background:var(--accent);color:#fff;font-size:13px;font-weight:700;padding:5px 14px;border-radius:20px;margin:8px 0 10px;">🍽️ Three-Course Meal Order</div>
-    <div class="page-sub">You will be selecting <strong>one item each</strong> from the main course, beverage, and dessert. Please choose a price range for your main dish to get started.</div>`;
+    <div style="display:inline-block;background:var(--accent);color:#fff;font-size:15px;font-weight:700;padding:7px 18px;border-radius:20px;margin:10px 0 12px;">🍽️ Three-Course Meal Order</div>
+    <div class="page-sub">You will be selecting <strong>one item each</strong> from the main course, beverage, and dessert. Please choose a <strong>price range for your main dish</strong> to get started.</div>`;
   inner.appendChild(hdr);
 
   const btnWrap = document.createElement("div");
@@ -704,7 +704,7 @@ function showMain() {
 
   buildAction({
     course: "main",
-    nextLabel: "Add Beverage →",
+    nextLabel: "Next →",
     onNext: showDrink,
   });
 }
@@ -734,7 +734,7 @@ function showDrink() {
 
   buildAction({
     course: "drink",
-    nextLabel: "Add Dessert →",
+    nextLabel: "Next →",
     onNext: showDessert,
   });
 }
@@ -764,7 +764,7 @@ function showDessert() {
 
   buildAction({
     course: "dessert",
-    nextLabel: "Review Order →",
+    nextLabel: "Next →",
     onNext: showConfirm,
   });
 }
@@ -813,7 +813,6 @@ function showConfirm() {
         const row = document.createElement("div");
         row.className = "confirm-item";
         row.innerHTML = `
-          <div class="confirm-emoji">${it.emoji}</div>
           <div class="confirm-name">${it.name}</div>
           <div class="confirm-kcal">${it.cal} kcal</div>`;
         sec.appendChild(row);
@@ -821,12 +820,6 @@ function showConfirm() {
     }
     wrap.appendChild(sec);
   });
-
-  const tot = document.createElement("div");
-  tot.className = "confirm-total";
-  tot.innerHTML = `<div class="confirm-total-lbl">Total</div>
-    <div class="confirm-total-kcal">${totalKcal} kcal</div>`;
-  wrap.appendChild(tot);
   inner.appendChild(wrap);
   content.appendChild(inner);
 
