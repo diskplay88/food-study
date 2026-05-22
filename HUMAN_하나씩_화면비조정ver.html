@@ -176,7 +176,7 @@ const COURSES = [
     ]
   },
   {
-    id:"drink", label:"Beverage", intro:"Now, how about something to drink? Here are some beverages that go nicely with your meal!",
+    id:"drink", label:"Beverage", intro:"How about something to drink? Here are some beverages that go nicely with your meal!",
     items:[
       {id:"d1",emoji:"🥤",name:"Zero Sugar Cola",        desc:"#ZeroSugar #ZeroCalorie #Clean",  cal:0,  taste:4.2,type:"healthy",  pair:"Cola"},
       {id:"d2",emoji:"🥤",name:"Original Cola",          desc:"#Sweet #Classic #Refreshing",     cal:210,taste:4.4,type:"unhealthy",pair:"Cola"},
@@ -522,7 +522,7 @@ async function runConversation(){
   runStart=Date.now();
   await addBotBubble("I\'m Alex, your meal selection assistant.",2800);
   await addBotBubble("I will assist you selecting a set meal consisting of a main course, a beverage, and a dessert.🍽️",2800);
-  await addBotBubble("To get started, please indicate your budget range for the main dish.",2800);
+  await addBotBubble("To get started, please tell me your budget range for the main dish.",2800);
   await addBotBubble(makePriceInput(),3500);
 }
 
