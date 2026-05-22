@@ -330,7 +330,7 @@ function makeCourseWidget(course){
   const foot=document.createElement("div"); foot.className="cfoot";
   const hint=document.createElement("span"); hint.className="chint"; hint.textContent="Select at least one item";
   const nbtn=document.createElement("button"); nbtn.className="nbtn";
-  nbtn.textContent=courseIdx<COURSES.length-1?"Next course \u2192":"Review order \u2192";
+  nbtn.textContent="Next →";
   nbtn.addEventListener("click",()=>onNext(course));
   foot.appendChild(hint); foot.appendChild(nbtn); wrap.appendChild(foot);
   return wrap;
@@ -367,6 +367,7 @@ async function onNext(course){
     courseShowTimes[next.id]=Date.now(); // menu grid now visible
 
   } else {
+    await addBotBubble("Selection recorded.",2800);
     await addBotBubble("Proceeding to order summary.",2800);
     await addBotBubble(makeOrderSummary(),3500);
   }
