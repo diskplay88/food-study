@@ -165,7 +165,7 @@ const SESSION_ID = "P" + Date.now().toString(36).toUpperCase();
 document.getElementById("avImg").src = HUMAN_SRC;
 const avEl=document.getElementById("avImg");
 avEl.style.width="100%"; avEl.style.height="100%";
-avEl.style.objectFit="cover"; avEl.style.objectPosition="center 30%";
+avEl.style.objectFit="cover"; avEl.style.objectPosition="center 40%";
 avEl.style.transform="scale(1.5)"; avEl.style.transformOrigin="center 35%";
 
 /* ── MENUS ── */
@@ -248,8 +248,8 @@ function makeBotRow(content){
   const iconWrap=document.createElement("div"); iconWrap.className="bot-icon";
   const iconImg=document.createElement("img"); iconImg.src=HUMAN_SRC; iconImg.alt="assistant";
   iconImg.style.width="100%"; iconImg.style.height="100%";
-  iconImg.style.objectFit="cover"; iconImg.style.objectPosition="center 30%";
-  iconImg.style.transform="scale(1.15)"; iconImg.style.transformOrigin="center 35%";
+  iconImg.style.objectFit="cover"; iconImg.style.objectPosition="center 40%";
+  iconImg.style.transform="scale(1.5)"; iconImg.style.transformOrigin="center 35%";
   iconWrap.appendChild(iconImg); row.appendChild(iconWrap);
   const bub=document.createElement("div"); bub.className="bubble";
   typeof content==="string"?(bub.innerHTML=content):bub.appendChild(content);
