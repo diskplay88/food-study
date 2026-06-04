@@ -522,13 +522,19 @@ function submitData(){
   const uc=cid=>courseSelections[cid].filter(s=>s.type==="unhealthy").length;
   const tc=cid=>courseSelections[cid].reduce((a,s)=>a+s.cal,0);
 
-  // total_time_sec: from page load to Confirm click
-  // session_durations sum equals this
   const totalTimeSec = ((confirmTime - studyStart)/1000).toFixed(1);
+
+  // 💡 [추가된 핵심 코드] 
+  // Confirm을 누른 시점의 최종 데이터를 sessionSelections의 마지막 순서에 채워 넣습니다.
+  sessionSelections[restartCount] = {
+    main: courseSelections.main[0] || null,
+    drink: courseSelections.drink[0] || null,
+    dessert: courseSelections.dessert[0] || null
+  };
 
   const payload={
     session_id:SESSION_ID, qualtrics_rid:RID,
-    condition:"robot", sheetName:"Robot", timestamp:new Date().toISOString(),
+    condition:"human", sheetName:"Human", timestamp:new Date().toISOString(),
     total_time_sec:totalTimeSec,
     price_range:priceInput,
     main_healthy_count:hc("main"), main_unhealthy_count:uc("main"), main_total_kcal:tc("main"),
@@ -542,10 +548,12 @@ function submitData(){
     session_decision_times:JSON.stringify(sessionDecisionTimes),
     session_presented_orders:JSON.stringify(sessionPresentedOrders),
     full_action_log:JSON.stringify(fullSelectionLog),
+
     // ── flat session columns (up to 3 sessions) ──
     session1_duration_sec: sessionDurations[0]||"",
     session2_duration_sec: sessionDurations[1]||"",
     session3_duration_sec: sessionDurations[2]||"",
+
     session1_main_dec_sec:    (sessionDecisionTimes.session1||{}).main||"",
     session1_drink_dec_sec:   (sessionDecisionTimes.session1||{}).drink||"",
     session1_dessert_dec_sec: (sessionDecisionTimes.session1||{}).dessert||"",
@@ -555,6 +563,7 @@ function submitData(){
     session3_main_dec_sec:    (sessionDecisionTimes.session3||{}).main||"",
     session3_drink_dec_sec:   (sessionDecisionTimes.session3||{}).drink||"",
     session3_dessert_dec_sec: (sessionDecisionTimes.session3||{}).dessert||"",
+
     session1_main_pos1: ((sessionPresentedOrders.session1||{}).main||[])[0]||"",
     session1_main_pos2: ((sessionPresentedOrders.session1||{}).main||[])[1]||"",
     session1_main_pos3: ((sessionPresentedOrders.session1||{}).main||[])[2]||"",
@@ -591,47 +600,52 @@ function submitData(){
     session3_dessert_pos2: ((sessionPresentedOrders.session3||{}).dessert||[])[1]||"",
     session3_dessert_pos3: ((sessionPresentedOrders.session3||{}).dessert||[])[2]||"",
     session3_dessert_pos4: ((sessionPresentedOrders.session3||{}).dessert||[])[3]||"",
-    session1_main_selected:    (sessionSelections[0]||{}).main    ? sessionSelections[0].main.name    : (courseSelections.main[0]    ? courseSelections.main[0].name    : ""),
-    session1_main_type:        (sessionSelections[0]||{}).main    ? sessionSelections[0].main.type    : (courseSelections.main[0]    ? courseSelections.main[0].type    : ""),
-    session1_main_cal:         (sessionSelections[0]||{}).main    ? sessionSelections[0].main.cal     : (courseSelections.main[0]    ? courseSelections.main[0].cal     : ""),
-    session1_drink_selected:   (sessionSelections[0]||{}).drink   ? sessionSelections[0].drink.name   : (courseSelections.drink[0]   ? courseSelections.drink[0].name   : ""),
-    session1_drink_type:       (sessionSelections[0]||{}).drink   ? sessionSelections[0].drink.type   : (courseSelections.drink[0]   ? courseSelections.drink[0].type   : ""),
-    session1_drink_cal:        (sessionSelections[0]||{}).drink   ? sessionSelections[0].drink.cal    : (courseSelections.drink[0]   ? courseSelections.drink[0].cal    : ""),
-    session1_dessert_selected: (sessionSelections[0]||{}).dessert ? sessionSelections[0].dessert.name : (courseSelections.dessert[0] ? courseSelections.dessert[0].name : ""),
-    session1_dessert_type:     (sessionSelections[0]||{}).dessert ? sessionSelections[0].dessert.type : (courseSelections.dessert[0] ? courseSelections.dessert[0].type : ""),
-    session1_dessert_cal:      (sessionSelections[0]||{}).dessert ? sessionSelections[0].dessert.cal  : (courseSelections.dessert[0] ? courseSelections.dessert[0].cal  : ""),
-    session2_main_selected:    (sessionSelections[1]||{}).main    ? sessionSelections[1].main.name    : "",
-    session2_main_type:        (sessionSelections[1]||{}).main    ? sessionSelections[1].main.type    : "",
-    session2_main_cal:         (sessionSelections[1]||{}).main    ? sessionSelections[1].main.cal     : "",
-    session2_drink_selected:   (sessionSelections[1]||{}).drink   ? sessionSelections[1].drink.name   : "",
-    session2_drink_type:       (sessionSelections[1]||{}).drink   ? sessionSelections[1].drink.type   : "",
-    session2_drink_cal:        (sessionSelections[1]||{}).drink   ? sessionSelections[1].drink.cal    : "",
-    session2_dessert_selected: (sessionSelections[1]||{}).dessert ? sessionSelections[1].dessert.name : "",
-    session2_dessert_type:     (sessionSelections[1]||{}).dessert ? sessionSelections[1].dessert.type : "",
-    session2_dessert_cal:      (sessionSelections[1]||{}).dessert ? sessionSelections[1].dessert.cal  : "",
-    session3_main_selected:    (sessionSelections[2]||{}).main    ? sessionSelections[2].main.name    : "",
-    session3_main_type:        (sessionSelections[2]||{}).main    ? sessionSelections[2].main.type    : "",
-    session3_main_cal:         (sessionSelections[2]||{}).main    ? sessionSelections[2].main.cal     : "",
-    session3_drink_selected:   (sessionSelections[2]||{}).drink   ? sessionSelections[2].drink.name   : "",
-    session3_drink_type:       (sessionSelections[2]||{}).drink   ? sessionSelections[2].drink.type   : "",
-    session3_drink_cal:        (sessionSelections[2]||{}).drink   ? sessionSelections[2].drink.cal    : "",
-    session3_dessert_selected: (sessionSelections[2]||{}).dessert ? sessionSelections[2].dessert.name : "",
-    session3_dessert_type:     (sessionSelections[2]||{}).dessert ? sessionSelections[2].dessert.type : "",
-    session3_dessert_cal:      (sessionSelections[2]||{}).dessert ? sessionSelections[2].dessert.cal  : ""
+
+    // 💡 [수정된 부분] 
+    // 위에서 데이터를 완벽하게 채워넣었으므로, 복잡했던 예외처리 코드를 지우고 간결하게 데이터를 추출합니다.
+    session1_main_selected:    sessionSelections[0]?.main?.name || "",
+    session1_main_type:        sessionSelections[0]?.main?.type || "",
+    session1_main_cal:         sessionSelections[0]?.main?.cal || "",
+    session1_drink_selected:   sessionSelections[0]?.drink?.name || "",
+    session1_drink_type:       sessionSelections[0]?.drink?.type || "",
+    session1_drink_cal:        sessionSelections[0]?.drink?.cal || "",
+    session1_dessert_selected: sessionSelections[0]?.dessert?.name || "",
+    session1_dessert_type:     sessionSelections[0]?.dessert?.type || "",
+    session1_dessert_cal:      sessionSelections[0]?.dessert?.cal || "",
+
+    session2_main_selected:    sessionSelections[1]?.main?.name || "",
+    session2_main_type:        sessionSelections[1]?.main?.type || "",
+    session2_main_cal:         sessionSelections[1]?.main?.cal || "",
+    session2_drink_selected:   sessionSelections[1]?.drink?.name || "",
+    session2_drink_type:       sessionSelections[1]?.drink?.type || "",
+    session2_drink_cal:        sessionSelections[1]?.drink?.cal || "",
+    session2_dessert_selected: sessionSelections[1]?.dessert?.name || "",
+    session2_dessert_type:     sessionSelections[1]?.dessert?.type || "",
+    session2_dessert_cal:      sessionSelections[1]?.dessert?.cal || "",
+
+    session3_main_selected:    sessionSelections[2]?.main?.name || "",
+    session3_main_type:        sessionSelections[2]?.main?.type || "",
+    session3_main_cal:         sessionSelections[2]?.main?.cal || "",
+    session3_drink_selected:   sessionSelections[2]?.drink?.name || "",
+    session3_drink_type:       sessionSelections[2]?.drink?.type || "",
+    session3_drink_cal:        sessionSelections[2]?.drink?.cal || "",
+    session3_dessert_selected: sessionSelections[2]?.dessert?.name || "",
+    session3_dessert_type:     sessionSelections[2]?.dessert?.type || "",
+    session3_dessert_cal:      sessionSelections[2]?.dessert?.cal || ""
   };
 
   COURSES.forEach(c=>{
     const sel=courseSelections[c.id];
     for(let i=0;i<4;i++){
       const s=sel[i];
-      payload[c.id+"_item"+(i+1)+"_name"]     =s?s.name:"";
-      payload[c.id+"_item"+(i+1)+"_type"]     =s?s.type:"";
-      payload[c.id+"_item"+(i+1)+"_pair"]     =s?s.pair:"";
-      payload[c.id+"_item"+(i+1)+"_cal"]      =s?s.cal:"";
-      payload[c.id+"_item"+(i+1)+"_taste"]    =s?s.taste:"";
-      payload[c.id+"_item"+(i+1)+"_order"]    =s?s.select_order:"";
-      payload[c.id+"_item"+(i+1)+"_position"] =s?(s.display_position||""):"";
-      payload[c.id+"_item"+(i+1)+"_elapsed"]  =s?((s.timestamp_ms-studyStart)/1000).toFixed(1):"";
+      payload[c.id+"_item"+(i+1)+"_name"]      =s?s.name:"";
+      payload[c.id+"_item"+(i+1)+"_type"]      =s?s.type:"";
+      payload[c.id+"_item"+(i+1)+"_pair"]      =s?s.pair:"";
+      payload[c.id+"_item"+(i+1)+"_cal"]       =s?s.cal:"";
+      payload[c.id+"_item"+(i+1)+"_taste"]     =s?s.taste:"";
+      payload[c.id+"_item"+(i+1)+"_order"]     =s?s.select_order:"";
+      payload[c.id+"_item"+(i+1)+"_position"]  =s?(s.display_position||""):"";
+      payload[c.id+"_item"+(i+1)+"_elapsed"]   =s?((s.timestamp_ms-studyStart)/1000).toFixed(1):"";
     }
   });
 
