@@ -888,6 +888,13 @@ function submitData() {
     ? ((confirmTime - t0)/1000).toFixed(1)
     : elapsed();
 
+  // 💡 [수정1] 마지막 세션 데이터를 잃어버리지 않도록 저장 (이전 파일과 동일한 원리)
+  sessionSelections[restarts] = {
+    main:    sel.main[0]    ? {name:sel.main[0].name,    type:sel.main[0].type,    cal:sel.main[0].cal}    : null,
+    drink:   sel.drink[0]   ? {name:sel.drink[0].name,   type:sel.drink[0].type,   cal:sel.drink[0].cal}   : null,
+    dessert: sel.dessert[0] ? {name:sel.dessert[0].name, type:sel.dessert[0].type, cal:sel.dessert[0].cal} : null
+  };
+
   const p = {
     session_id:SESSION, qualtrics_rid:RID,
     condition:"kiosk", sheetName:"Kiosk",
@@ -916,7 +923,7 @@ function submitData() {
     session_decision_times:JSON.stringify(sessionDecisionTimes),
     session_presented_orders:JSON.stringify(sessionPresentedOrders),
     full_action_log:JSON.stringify(log),
-    // flat columns for R analysis (max 3 sessions)
+    
     session1_duration_sec:  sessionDurations[0]||"",
     session2_duration_sec:  sessionDurations[1]||"",
     session3_duration_sec:  sessionDurations[2]||"",
@@ -929,12 +936,14 @@ function submitData() {
     session3_main_dec_sec:  (sessionDecisionTimes.session3||{}).main||"",
     session3_drink_dec_sec: (sessionDecisionTimes.session3||{}).drink||"",
     session3_dessert_dec_sec:(sessionDecisionTimes.session3||{}).dessert||"",
+    
     session1_main_order:    JSON.stringify((sessionPresentedOrders.session1||{}).main||[]),
     session1_drink_order:   JSON.stringify((sessionPresentedOrders.session1||{}).drink||[]),
     session1_dessert_order: JSON.stringify((sessionPresentedOrders.session1||{}).dessert||[]),
     session2_main_order:    JSON.stringify((sessionPresentedOrders.session2||{}).main||[]),
     session2_drink_order:   JSON.stringify((sessionPresentedOrders.session2||{}).drink||[]),
     session2_dessert_order: JSON.stringify((sessionPresentedOrders.session2||{}).dessert||[]),
+    
     session1_main_pos1: ((sessionPresentedOrders.session1||{}).main||[])[0]||"",
     session1_main_pos2: ((sessionPresentedOrders.session1||{}).main||[])[1]||"",
     session1_main_pos3: ((sessionPresentedOrders.session1||{}).main||[])[2]||"",
@@ -947,6 +956,7 @@ function submitData() {
     session1_dessert_pos2: ((sessionPresentedOrders.session1||{}).dessert||[])[1]||"",
     session1_dessert_pos3: ((sessionPresentedOrders.session1||{}).dessert||[])[2]||"",
     session1_dessert_pos4: ((sessionPresentedOrders.session1||{}).dessert||[])[3]||"",
+    
     session2_main_pos1: ((sessionPresentedOrders.session2||{}).main||[])[0]||"",
     session2_main_pos2: ((sessionPresentedOrders.session2||{}).main||[])[1]||"",
     session2_main_pos3: ((sessionPresentedOrders.session2||{}).main||[])[2]||"",
@@ -959,6 +969,7 @@ function submitData() {
     session2_dessert_pos2: ((sessionPresentedOrders.session2||{}).dessert||[])[1]||"",
     session2_dessert_pos3: ((sessionPresentedOrders.session2||{}).dessert||[])[2]||"",
     session2_dessert_pos4: ((sessionPresentedOrders.session2||{}).dessert||[])[3]||"",
+    
     session3_main_pos1: ((sessionPresentedOrders.session3||{}).main||[])[0]||"",
     session3_main_pos2: ((sessionPresentedOrders.session3||{}).main||[])[1]||"",
     session3_main_pos3: ((sessionPresentedOrders.session3||{}).main||[])[2]||"",
@@ -971,33 +982,37 @@ function submitData() {
     session3_dessert_pos2: ((sessionPresentedOrders.session3||{}).dessert||[])[1]||"",
     session3_dessert_pos3: ((sessionPresentedOrders.session3||{}).dessert||[])[2]||"",
     session3_dessert_pos4: ((sessionPresentedOrders.session3||{}).dessert||[])[3]||"",
-    session1_main_selected:    (sessionSelections[0]||{}).main    ? sessionSelections[0].main.name    : (sel.main[0]    ? sel.main[0].name    : ""),
-    session1_main_type:        (sessionSelections[0]||{}).main    ? sessionSelections[0].main.type    : (sel.main[0]    ? sel.main[0].type    : ""),
-    session1_main_cal:         (sessionSelections[0]||{}).main    ? sessionSelections[0].main.cal     : (sel.main[0]    ? sel.main[0].cal     : ""),
-    session1_drink_selected:   (sessionSelections[0]||{}).drink   ? sessionSelections[0].drink.name   : (sel.drink[0]   ? sel.drink[0].name   : ""),
-    session1_drink_type:       (sessionSelections[0]||{}).drink   ? sessionSelections[0].drink.type   : (sel.drink[0]   ? sel.drink[0].type   : ""),
-    session1_drink_cal:        (sessionSelections[0]||{}).drink   ? sessionSelections[0].drink.cal    : (sel.drink[0]   ? sel.drink[0].cal    : ""),
-    session1_dessert_selected: (sessionSelections[0]||{}).dessert ? sessionSelections[0].dessert.name : (sel.dessert[0] ? sel.dessert[0].name : ""),
-    session1_dessert_type:     (sessionSelections[0]||{}).dessert ? sessionSelections[0].dessert.type : (sel.dessert[0] ? sel.dessert[0].type : ""),
-    session1_dessert_cal:      (sessionSelections[0]||{}).dessert ? sessionSelections[0].dessert.cal  : (sel.dessert[0] ? sel.dessert[0].cal  : ""),
-    session2_main_selected:    (sessionSelections[1]||{}).main    ? sessionSelections[1].main.name    : "",
-    session2_main_type:        (sessionSelections[1]||{}).main    ? sessionSelections[1].main.type    : "",
-    session2_main_cal:         (sessionSelections[1]||{}).main    ? sessionSelections[1].main.cal     : "",
-    session2_drink_selected:   (sessionSelections[1]||{}).drink   ? sessionSelections[1].drink.name   : "",
-    session2_drink_type:       (sessionSelections[1]||{}).drink   ? sessionSelections[1].drink.type   : "",
-    session2_drink_cal:        (sessionSelections[1]||{}).drink   ? sessionSelections[1].drink.cal    : "",
-    session2_dessert_selected: (sessionSelections[1]||{}).dessert ? sessionSelections[1].dessert.name : "",
-    session2_dessert_type:     (sessionSelections[1]||{}).dessert ? sessionSelections[1].dessert.type : "",
-    session2_dessert_cal:      (sessionSelections[1]||{}).dessert ? sessionSelections[1].dessert.cal  : "",
-    session3_main_selected:    (sessionSelections[2]||{}).main    ? sessionSelections[2].main.name    : "",
-    session3_main_type:        (sessionSelections[2]||{}).main    ? sessionSelections[2].main.type    : "",
-    session3_main_cal:         (sessionSelections[2]||{}).main    ? sessionSelections[2].main.cal     : "",
-    session3_drink_selected:   (sessionSelections[2]||{}).drink   ? sessionSelections[2].drink.name   : "",
-    session3_drink_type:       (sessionSelections[2]||{}).drink   ? sessionSelections[2].drink.type   : "",
-    session3_drink_cal:        (sessionSelections[2]||{}).drink   ? sessionSelections[2].drink.cal    : "",
-    session3_dessert_selected: (sessionSelections[2]||{}).dessert ? sessionSelections[2].dessert.name : "",
-    session3_dessert_type:     (sessionSelections[2]||{}).dessert ? sessionSelections[2].dessert.type : "",
-    session3_dessert_cal:      (sessionSelections[2]||{}).dessert ? sessionSelections[2].dessert.cal  : ""
+
+    // 💡 간결해진 선택 데이터 매핑 (마지막 세션 값 정상 저장됨)
+    session1_main_selected:    sessionSelections[0]?.main?.name || "",
+    session1_main_type:        sessionSelections[0]?.main?.type || "",
+    session1_main_cal:         sessionSelections[0]?.main?.cal || "",
+    session1_drink_selected:   sessionSelections[0]?.drink?.name || "",
+    session1_drink_type:       sessionSelections[0]?.drink?.type || "",
+    session1_drink_cal:        sessionSelections[0]?.drink?.cal || "",
+    session1_dessert_selected: sessionSelections[0]?.dessert?.name || "",
+    session1_dessert_type:     sessionSelections[0]?.dessert?.type || "",
+    session1_dessert_cal:      sessionSelections[0]?.dessert?.cal || "",
+    
+    session2_main_selected:    sessionSelections[1]?.main?.name || "",
+    session2_main_type:        sessionSelections[1]?.main?.type || "",
+    session2_main_cal:         sessionSelections[1]?.main?.cal || "",
+    session2_drink_selected:   sessionSelections[1]?.drink?.name || "",
+    session2_drink_type:       sessionSelections[1]?.drink?.type || "",
+    session2_drink_cal:        sessionSelections[1]?.drink?.cal || "",
+    session2_dessert_selected: sessionSelections[1]?.dessert?.name || "",
+    session2_dessert_type:     sessionSelections[1]?.dessert?.type || "",
+    session2_dessert_cal:      sessionSelections[1]?.dessert?.cal || "",
+    
+    session3_main_selected:    sessionSelections[2]?.main?.name || "",
+    session3_main_type:        sessionSelections[2]?.main?.type || "",
+    session3_main_cal:         sessionSelections[2]?.main?.cal || "",
+    session3_drink_selected:   sessionSelections[2]?.drink?.name || "",
+    session3_drink_type:       sessionSelections[2]?.drink?.type || "",
+    session3_drink_cal:        sessionSelections[2]?.drink?.cal || "",
+    session3_dessert_selected: sessionSelections[2]?.dessert?.name || "",
+    session3_dessert_type:     sessionSelections[2]?.dessert?.type || "",
+    session3_dessert_cal:      sessionSelections[2]?.dessert?.cal || ""
   };
 
   // per-item detail columns
@@ -1011,6 +1026,8 @@ function submitData() {
       p[course+"_item"+(i+1)+"_taste"]    = s ? s.taste : "";
       p[course+"_item"+(i+1)+"_order"]    = s ? s.order : "";
       p[course+"_item"+(i+1)+"_position"] = s ? s.pos   : "";
+      // 💡 [수정2] 누락되었던 elapsed (선택까지 걸린 시간) 데이터 추가 기록
+      p[course+"_item"+(i+1)+"_elapsed"]  = s ? ((s.ts - t0)/1000).toFixed(1) : "";
     }
   });
 
