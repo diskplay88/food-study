@@ -421,11 +421,10 @@ function makeDoneCard(){
   d.innerHTML = `
     <div class="bchk">&#9989;</div>
     <p style="font-size:16px;font-weight:600;margin:8px 0;">Order Complete!</p>
-    <p style="font-size:16px;font-weight:700;margin:0 0 16px;">Please press the below button to continue.</p>
-    <button onclick="(function(){var r=window.open('','_self');if(r)r.close();else window.close();})()"
-      style="padding:10px 24px;border-radius:20px;background:#2D6A4F;
-             color:#fff;border:none;font-size:14px;cursor:pointer;
-             font-family:inherit;margin-top:4px;">
+    <p style="font-size:16px;font-weight:700;color:#1e3a5f;margin:14px 0 18px;">
+      Please press the below button to continue.
+    </p>
+    <button onclick="(function(){var r=window.open('','_self');if(r)r.close();else window.close();})()" style="padding:14px 36px;border-radius:25px;background:#3b82f6;color:#fff;border:none;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:8px;box-shadow:0 4px 12px rgba(59,130,246,0.4);">
       Continue
     </button>
   `;
