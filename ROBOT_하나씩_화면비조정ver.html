@@ -64,16 +64,56 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);height:100%;
 .nbtn.go{opacity:1;pointer-events:auto;}.nbtn.go:hover{opacity:.88;}
 
 /* ORDER SUMMARY */
-.osummary{display:flex;flex-direction:column;gap:5px;width:100%;max-width:min(480px,90%);}
-.ohead{font-size:11px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-top:6px;}
-.oitem{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border);font-size:clamp(13px,1.8vw,16px);}
-.oitem:last-child{border-bottom:none;}
-.fc{display:flex;flex-direction:column;gap:8px;margin-top:8px;}
-.fc button{padding:11px 20px;border-radius:30px;font-family:var(--font);font-size:14px;font-weight:500;cursor:pointer;border:1.5px solid var(--accent);transition:all .14s;}
-.byes{background:var(--accent);color:#fff;}.byes:hover{opacity:.88;}
-.bno{background:#fff;color:var(--accent);}.bno:hover{background:var(--accent-light);}
+.osummary {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: 100%;
+  /* 480px 제한을 풀어서 화면(말풍선)이 넓어지면 같이 넓어지게 만듭니다 */
+  max-width: 100%; 
+}
+.ohead {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  margin-top: 6px;
+}
+.oitem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: clamp(13px, 1.8vw, 16px);
+  /* 메뉴명이 불필요하게 단어 중간에서 뚝뚝 끊기지 않도록 방지합니다 */
+  word-break: keep-all; 
+}
+.oitem:last-child {
+  border-bottom: none;
+}
+.fc {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+.fc button {
+  padding: 11px 20px;
+  border-radius: 30px;
+  font-family: var(--font);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1.5px solid var(--accent);
+  transition: all .14s;
+}
+.byes { background: var(--accent); color: #fff; }
+.byes:hover { opacity: .88; }
+.bno { background: #fff; color: var(--accent); }
+.bno:hover { background: var(--accent-light); }
 
-/* DONE */
 /* DONE */
 .done-card {
   background: var(--accent-light);
